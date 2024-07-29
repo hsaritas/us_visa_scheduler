@@ -3,6 +3,7 @@ import json
 import random
 import requests
 import configparser
+import traceback
 from datetime import datetime
 
 from selenium import webdriver
@@ -93,7 +94,7 @@ def send_notification(title, msg):
             print(response.body)
             print(response.headers)
         except Exception as e:
-            print(e.message)
+            print(traceback.format_exc())
     if PUSHOVER_TOKEN:
         url = "https://api.pushover.net/1/messages.json"
         data = {
@@ -236,7 +237,7 @@ else:
 
 
 if __name__ == "__main__":
-    first_loop = True
+    first_loop = True    
     while 1:
         LOG_FILE_NAME = "log_" + str(datetime.now().date()) + ".txt"
         if first_loop:
@@ -249,6 +250,7 @@ if __name__ == "__main__":
         try:
             msg = "-" * 60 + f"\nRequest count: {Req_count}, Log time: {datetime.today()}\n"
             print(msg)
+            
             info_logger(LOG_FILE_NAME, msg)
             dates = get_date()
             if not dates:
@@ -256,7 +258,7 @@ if __name__ == "__main__":
                 msg = f"List is empty, Probabely banned!\n\tSleep for {BAN_COOLDOWN_TIME} hours!\n"
                 print(msg)
                 info_logger(LOG_FILE_NAME, msg)
-                send_notification("BAN", msg)
+                #send_notification("BAN", msg)
                 driver.get(SIGN_OUT_LINK)
                 time.sleep(BAN_COOLDOWN_TIME * hour)
                 first_loop = True
@@ -265,7 +267,7 @@ if __name__ == "__main__":
                 msg = ""
                 for d in dates:
                     msg = msg + "%s" % (d.get('date')) + ", "
-                msg = "Available dates:\n"+ msg
+                msg = "****************Available dates:********************\n"+ msg
                 print(msg)
                 info_logger(LOG_FILE_NAME, msg)
                 date = get_available_date(dates)
@@ -290,9 +292,10 @@ if __name__ == "__main__":
                     print(msg)
                     info_logger(LOG_FILE_NAME, msg)
                     time.sleep(RETRY_WAIT_TIME)
-        except:
+        except ValueError:
+            msg = traceback.format_exc()
             # Exception Occured
-            msg = f"Break the loop after exception!\n"
+            #msg = f"Break the loop after exception!\n"
             END_MSG_TITLE = "EXCEPTION"
             break
 
