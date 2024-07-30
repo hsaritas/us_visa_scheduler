@@ -55,8 +55,8 @@ hour = 60 * minute
 # Time between steps (interactions with forms)
 STEP_TIME = 0.5
 # Time between retries/checks for available dates (seconds)
-RETRY_TIME_L_BOUND = config['TIME'].getfloat('RETRY_TIME_L_BOUND')
-RETRY_TIME_U_BOUND = config['TIME'].getfloat('RETRY_TIME_U_BOUND')
+RETRY_TIME_L_BOUND = config['TIME'].getint('RETRY_TIME_L_BOUND')
+RETRY_TIME_U_BOUND = config['TIME'].getint('RETRY_TIME_U_BOUND')
 # Cooling down after WORK_LIMIT_TIME hours of work (Avoiding Ban)
 WORK_LIMIT_TIME = config['TIME'].getfloat('WORK_LIMIT_TIME')
 WORK_COOLDOWN_TIME = config['TIME'].getfloat('WORK_COOLDOWN_TIME')
@@ -291,13 +291,14 @@ if __name__ == "__main__":
                     msg = "Retry Wait Time: "+ str(RETRY_WAIT_TIME)+ " seconds"
                     print(msg)
                     info_logger(LOG_FILE_NAME, msg)
-                    time.sleep(RETRY_WAIT_TIME)
+                    time.sleep(WORK_COOLDOWN_TIME * hour)
         except ValueError:
             msg = traceback.format_exc()
             # Exception Occured
             #msg = f"Break the loop after exception!\n"
             END_MSG_TITLE = "EXCEPTION"
-            break
+            first_loop = True
+            time.sleep(RETRY_WAIT_TIME)
 
 print(msg)
 info_logger(LOG_FILE_NAME, msg)
