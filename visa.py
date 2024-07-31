@@ -1,3 +1,4 @@
+import os
 import time
 import json
 import random
@@ -231,7 +232,12 @@ def info_logger(file_path, log):
 
 
 if LOCAL_USE:
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    chrome_install = ChromeDriverManager().install()
+    folder = os.path.dirname(chrome_install)
+    chromedriver_path = os.path.join(folder, "chromedriver.exe")
+    m_service = Service(chromedriver_path)
+    driver = webdriver.Chrome(service=m_service)
 else:
     driver = webdriver.Remote(command_executor=HUB_ADDRESS, options=webdriver.ChromeOptions())
 
