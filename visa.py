@@ -297,7 +297,7 @@ if __name__ == "__main__":
                     msg = "Retry Wait Time: "+ str(RETRY_WAIT_TIME)+ " seconds"
                     print(msg)
                     info_logger(LOG_FILE_NAME, msg)
-                    time.sleep(WORK_COOLDOWN_TIME * hour)
+                    time.sleep(RETRY_WAIT_TIME)
         except ValueError:
             msg = traceback.format_exc()
             # Exception Occured
