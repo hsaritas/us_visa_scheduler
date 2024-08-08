@@ -230,6 +230,11 @@ def info_logger(file_path, log):
     with open(file_path, "a") as file:
         file.write(str(datetime.now().time()) + ":\n" + log + "\n")
 
+while 1:
+    current_time = datetime.now()
+    if current_time.hour==5 and current_time.minute==55:
+        break
+    time.sleep(10)
 
 if LOCAL_USE:
     #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -241,10 +246,12 @@ if LOCAL_USE:
 else:
     driver = webdriver.Remote(command_executor=HUB_ADDRESS, options=webdriver.ChromeOptions())
 
-
 if __name__ == "__main__":
     first_loop = True    
     while 1:
+        current_time = datetime.now()
+        if current_time.hour==9:
+            break
         LOG_FILE_NAME = "log_" + str(datetime.now().date()) + ".txt"
         if first_loop:
             t0 = time.time()
