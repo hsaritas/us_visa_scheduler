@@ -162,18 +162,22 @@ def reschedule(date):
     headers = {
         "User-Agent": driver.execute_script("return navigator.userAgent;"),
         "Referer": APPOINTMENT_URL,
+        "Content-Type": "application/x-www-form-urlencoded",
         "Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
     }
     data = {
-        "utf8": driver.find_element(by=By.NAME, value='utf8').get_attribute('value'),
-        "authenticity_token": driver.find_element(by=By.NAME, value='authenticity_token').get_attribute('value'),
-        "confirmed_limit_message": driver.find_element(by=By.NAME, value='confirmed_limit_message').get_attribute('value'),
-        "use_consulate_appointment_capacity": driver.find_element(by=By.NAME, value='use_consulate_appointment_capacity').get_attribute('value'),
+        "utf8": '✓',
+        "authenticity_token": driver.find_element(by=By.NAME, value='csrf-token').get_attribute('content'),
+        "confirmed_limit_message": '1',
+        "use_consulate_appointment_capacity": 'true',
         "appointments[consulate_appointment][facility_id]": FACILITY_ID,
         "appointments[consulate_appointment][date]": date,
         "appointments[consulate_appointment][time]": time,
+        "appointments[asc_appointment][facility_id]": '',
+        "appointments[asc_appointment][date]": '',
+        "appointments[asc_appointment][time]": '',
     }
-    r = requests.post(APPOINTMENT_URL, headers=headers, data=data)
+    r = requests.post(APPOINTMENT_URL, headers=headers, data=data, allow_redirects=True)
     if(r.text.find('Successfully Scheduled') != -1):
         title = "SUCCESS"
         msg = f"Rescheduled Successfully! {date} {time}"
@@ -230,11 +234,11 @@ def info_logger(file_path, log):
     with open(file_path, "a") as file:
         file.write(str(datetime.now().time()) + ":\n" + log + "\n")
 
-while 1:
-    current_time = datetime.now()
-    if current_time.hour==5 and current_time.minute==55:
-        break
-    time.sleep(10)
+# while 1:
+#     current_time = datetime.now()
+#     if current_time.hour==5 and current_time.minute==55:
+#         break
+#     time.sleep(10)
 
 if LOCAL_USE:
     #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -243,15 +247,16 @@ if LOCAL_USE:
     chromedriver_path = os.path.join(folder, "chromedriver.exe")
     m_service = Service(chromedriver_path)
     driver = webdriver.Chrome(service=m_service)
+    driver.set_script_timeout(120)
 else:
     driver = webdriver.Remote(command_executor=HUB_ADDRESS, options=webdriver.ChromeOptions())
 
 if __name__ == "__main__":
     first_loop = True    
     while 1:
-        current_time = datetime.now()
-        if current_time.hour==9:
-            break
+        # current_time = datetime.now()
+        # if current_time.hour==9:
+        #     break
         LOG_FILE_NAME = "log_" + str(datetime.now().date()) + ".txt"
         if first_loop:
             t0 = time.time()
