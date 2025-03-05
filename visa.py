@@ -5,6 +5,7 @@ import random
 import requests
 import configparser
 import traceback
+import winsound
 from datetime import datetime
 
 from selenium import webdriver
@@ -18,6 +19,9 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from embassy import *
+
+frequency = 2500  # Set Frequency To 2500 Hertz
+duration = 1000  # Set Duration To 1000 ms == 1 second
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -54,7 +58,7 @@ PERSONAL_PUSHER_URL = config['NOTIFICATION']['PERSONAL_PUSHER_URL']
 minute = 60
 hour = 60 * minute
 # Time between steps (interactions with forms)
-STEP_TIME = 0.5
+STEP_TIME = 1
 # Time between retries/checks for available dates (seconds)
 RETRY_TIME_L_BOUND = config['TIME'].getint('RETRY_TIME_L_BOUND')
 RETRY_TIME_U_BOUND = config['TIME'].getint('RETRY_TIME_U_BOUND')
@@ -75,6 +79,9 @@ APPOINTMENT_URL = f"https://ais.usvisa-info.com/{EMBASSY}/niv/schedule/{SCHEDULE
 DATE_URL = f"https://ais.usvisa-info.com/{EMBASSY}/niv/schedule/{SCHEDULE_ID}/appointment/days/{FACILITY_ID}.json?appointments[expedite]=false"
 TIME_URL = f"https://ais.usvisa-info.com/{EMBASSY}/niv/schedule/{SCHEDULE_ID}/appointment/times/{FACILITY_ID}.json?date=%s&appointments[expedite]=false"
 SIGN_OUT_LINK = f"https://ais.usvisa-info.com/{EMBASSY}/niv/users/sign_out"
+ATTEND_APPOINTMENT_XPATH = f"//*[@id='main']/div[2]/div[2]/div[1]/div/div/div[1]/div[2]/ul/li/a"
+RESCHEDULE_APPOINTMENT_LABEL_XPATH = f"/html/body/div[4]/main/div[2]/div[2]/div/section/ul/li[4]/a"
+RESCHEDULE_APPOINTMENT_XPATH = f"/html/body/div[4]/main/div[2]/div[2]/div/section/ul/li[4]/div/div/div[2]/p[2]/a"
 
 JS_SCRIPT = ("var req = new XMLHttpRequest();"
              f"req.open('GET', '%s', false);"
@@ -128,6 +135,8 @@ def auto_action(label, find_by, el_type, action, value, sleep_time=0):
             item = driver.find_element(By.CLASS_NAME, el_type)
         case 'xpath':
             item = driver.find_element(By.XPATH, el_type)
+        case 'href':
+            item = driver.find_element(By.LINK_TEXT, el_type)
         case _:
             return 0
     # Do Action:
@@ -155,10 +164,18 @@ def start_process():
     auto_action("Enter Panel", "name", "commit", "click", "", STEP_TIME)
     Wait(driver, 60).until(EC.presence_of_element_located((By.XPATH, "//a[contains(text(), '" + REGEX_CONTINUE + "')]")))
     print("\n\tlogin successful!\n")
+    #auto_action("Attend Appointment Continue", "xpath", ATTEND_APPOINTMENT_XPATH, "click", "", STEP_TIME)
+    #auto_action("Reschedule Appointment Menu", "xpath", RESCHEDULE_APPOINTMENT_LABEL_XPATH, "click", "", STEP_TIME)
+    #auto_action("Reschedule Appointment Button", "xpath", RESCHEDULE_APPOINTMENT_XPATH, "click", "", STEP_TIME)
+    #auto_action("Reschedule Appointment Commit", "name", "commit", "click", "", STEP_TIME)
 
 def reschedule(date):
     time = get_time(date)
     driver.get(APPOINTMENT_URL)
+    #auto_action("Attend Appointment Continue", "xpath", ATTEND_APPOINTMENT_XPATH, "click", "", STEP_TIME)
+    #auto_action("Reschedule Appointment Menu", "xpath", RESCHEDULE_APPOINTMENT_LABEL_XPATH, "click", "", STEP_TIME)
+    #auto_action("Reschedule Appointment Button", "xpath", RESCHEDULE_APPOINTMENT_XPATH, "click", "", STEP_TIME)
+    auto_action("Reschedule Appointment Commit", "name", "commit", "click", "", STEP_TIME)
     headers = {
         "User-Agent": driver.execute_script("return navigator.userAgent;"),
         "Referer": APPOINTMENT_URL,
@@ -167,7 +184,7 @@ def reschedule(date):
     }
     data = {
         "utf8": '✓',
-        "authenticity_token": driver.find_element(by=By.NAME, value='csrf-token').get_attribute('content'),
+        "authenticity_token": driver.find_element(by=By.NAME, value='authenticity_token').get_attribute('value'),
         "confirmed_limit_message": '1',
         "use_consulate_appointment_capacity": 'true',
         "appointments[consulate_appointment][facility_id]": FACILITY_ID,
@@ -178,10 +195,12 @@ def reschedule(date):
         "appointments[asc_appointment][time]": '',
     }
     r = requests.post(APPOINTMENT_URL, headers=headers, data=data, allow_redirects=True)
+    winsound.Beep(frequency, duration)
     if(r.text.find('Successfully Scheduled') != -1):
         title = "SUCCESS"
         msg = f"Rescheduled Successfully! {date} {time}"
     else:
+        winsound.Beep(frequency, duration)
         title = "FAIL"
         msg = f"Reschedule Failed!!! {date} {time}"
     return [title, msg]
@@ -200,7 +219,9 @@ def get_time(date):
     script = JS_SCRIPT % (str(time_url), session)
     content = driver.execute_script(script)
     data = json.loads(content)
-    time = data.get("available_times")[-1]
+    print(content)
+    info_logger(LOG_FILE_NAME, content)
+    time = data.get("available_times")[0]
     print(f"Got time successfully! {date} {time}")
     return time
 
