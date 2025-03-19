@@ -287,6 +287,12 @@ if __name__ == "__main__":
             first_loop = False
         Req_count += 1
         try:
+            now = datetime.now()
+            if(now.minute%5) != 0:
+                myRnd = random.randint(1, 10)
+                print(f"\n{now} - sleep for: {myRnd} secs\n")
+                time.sleep(myRnd)
+                continue
             msg = "-" * 60 + f"\nRequest count: {Req_count}, Log time: {datetime.today()}\n"
             print(msg)
             
