@@ -179,20 +179,21 @@ def reschedule(date):
     headers = {
         "User-Agent": driver.execute_script("return navigator.userAgent;"),
         "Referer": APPOINTMENT_URL,
+        "Origin": 'https://ais.usvisa-info.com',
         "Content-Type": "application/x-www-form-urlencoded",
-        "Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
+        #"Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
     }
     data = {
-        "utf8": '✓',
+        #utf8": '✓',
         "authenticity_token": driver.find_element(by=By.NAME, value='authenticity_token').get_attribute('value'),
-        "confirmed_limit_message": '1',
+        "confirmed_limit_message": 1,
         "use_consulate_appointment_capacity": 'true',
         "appointments[consulate_appointment][facility_id]": FACILITY_ID,
         "appointments[consulate_appointment][date]": date,
         "appointments[consulate_appointment][time]": time,
-        "appointments[asc_appointment][facility_id]": '',
-        "appointments[asc_appointment][date]": '',
-        "appointments[asc_appointment][time]": '',
+        #"appointments[asc_appointment][facility_id]": '',
+        #"appointments[asc_appointment][date]": '',
+        #"appointments[asc_appointment][time]": '',
     }
     r = requests.post(APPOINTMENT_URL, headers=headers, data=data, allow_redirects=True)
     winsound.Beep(frequency, duration)
