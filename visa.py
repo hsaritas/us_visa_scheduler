@@ -171,17 +171,16 @@ def start_process():
 
 def reschedule(date):
     time = get_time(date)
-    driver.get(APPOINTMENT_URL)
-    #auto_action("Attend Appointment Continue", "xpath", ATTEND_APPOINTMENT_XPATH, "click", "", STEP_TIME)
-    #auto_action("Reschedule Appointment Menu", "xpath", RESCHEDULE_APPOINTMENT_LABEL_XPATH, "click", "", STEP_TIME)
-    #auto_action("Reschedule Appointment Button", "xpath", RESCHEDULE_APPOINTMENT_XPATH, "click", "", STEP_TIME)
+    #driver.get(APPOINTMENT_URL)
+    auto_action("Attend Appointment Continue", "xpath", ATTEND_APPOINTMENT_XPATH, "click", "", STEP_TIME)
+    auto_action("Reschedule Appointment Menu", "xpath", RESCHEDULE_APPOINTMENT_LABEL_XPATH, "click", "", STEP_TIME)
+    auto_action("Reschedule Appointment Button", "xpath", RESCHEDULE_APPOINTMENT_XPATH, "click", "", STEP_TIME)
     auto_action("Reschedule Appointment Commit", "name", "commit", "click", "", STEP_TIME)
     headers = {
         "User-Agent": driver.execute_script("return navigator.userAgent;"),
-        "Referer": APPOINTMENT_URL,
-        "Origin": 'https://ais.usvisa-info.com',
+        "Referer": driver.execute_script("return document.URL;"), 
         "Content-Type": "application/x-www-form-urlencoded",
-        #"Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
+        "Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
     }
     data = {
         #utf8": '✓',
@@ -195,7 +194,7 @@ def reschedule(date):
         #"appointments[asc_appointment][date]": '',
         #"appointments[asc_appointment][time]": '',
     }
-    r = requests.post(APPOINTMENT_URL, headers=headers, data=data, allow_redirects=True)
+    r = 1 #requests.post(APPOINTMENT_URL, headers=headers, data=data, allow_redirects=True)
     winsound.Beep(frequency, duration)
     if(r.text.find('Successfully Scheduled') != -1):
         title = "SUCCESS"
@@ -288,12 +287,12 @@ if __name__ == "__main__":
             first_loop = False
         Req_count += 1
         try:
-            now = datetime.now()
-            if(now.minute%5) != 0:
-                myRnd = random.randint(1, 10)
-                print(f"\n{now} - sleep for: {myRnd} secs\n")
-                time.sleep(myRnd)
-                continue
+            # now = datetime.now()
+            # if(now.minute%5) != 0:
+            #     myRnd = random.randint(1, 10)
+            #     #print(f"\n{now} - sleep for: {myRnd} secs\n")
+            #     time.sleep(myRnd)
+            #     continue
             msg = "-" * 60 + f"\nRequest count: {Req_count}, Log time: {datetime.today()}\n"
             print(msg)
             
@@ -316,6 +315,7 @@ if __name__ == "__main__":
                 msg = "****************Available dates:********************\n"+ msg
                 print(msg)
                 info_logger(LOG_FILE_NAME, msg)
+                reschedule(dates[0].get('date'))
                 date = get_available_date(dates)
                 if date:
                     # A good date to schedule for
