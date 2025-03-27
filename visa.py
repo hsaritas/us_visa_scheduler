@@ -243,8 +243,6 @@ def get_available_date(dates):
         date = d.get('date')
         if is_in_period(date, PSD, PED):
             return date
-    print(f"\n\nNo available dates between ({PSD.date()}) and ({PED.date()})!")
-
 
 def info_logger(file_path, log):
     # file_path: e.g. "log.txt"
@@ -271,8 +269,7 @@ if __name__ == "__main__":
             total_time = 0
             Req_count = 0
             start_process()
-            first_loop = False
-        Req_count += 1
+            first_loop = False        
         try:
             now = datetime.now()
             if(now.minute%5) != 0:
@@ -280,6 +277,7 @@ if __name__ == "__main__":
                 #print(f"\n{now} - sleep for: {myRnd} secs\n")
                 time.sleep(myRnd)
                 continue
+            Req_count += 1
             msg = "-" * 60 + f"\nRequest count: {Req_count}, Log time: {datetime.today()}\n"
             print(msg)
             
@@ -298,8 +296,7 @@ if __name__ == "__main__":
                 # Print Available dates:
                 msg = ""
                 for d in dates:
-                    msg = msg + "%s" % (d.get('date')) + ", "
-                msg = "****************Available dates:********************\n"+ msg
+                    msg = msg + "%s" % (d.get('date')) + ", "                
                 print(msg)
                 info_logger(LOG_FILE_NAME, msg)
                 date = get_available_date(dates)
@@ -310,7 +307,7 @@ if __name__ == "__main__":
                 RETRY_WAIT_TIME = random.randint(RETRY_TIME_L_BOUND, RETRY_TIME_U_BOUND)
                 t1 = time.time()
                 total_time = t1 - t0
-                msg = "\nWorking Time:  ~ {:.2f} minutes".format(total_time/minute)
+                msg = " Working Time:  ~ {:.2f} minutes".format(total_time/minute)
                 print(msg)
                 info_logger(LOG_FILE_NAME, msg)
                 if total_time > WORK_LIMIT_TIME * hour:
