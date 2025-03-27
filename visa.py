@@ -164,18 +164,14 @@ def start_process():
     auto_action("Enter Panel", "name", "commit", "click", "", STEP_TIME)
     Wait(driver, 60).until(EC.presence_of_element_located((By.XPATH, "//a[contains(text(), '" + REGEX_CONTINUE + "')]")))
     print("\n\tlogin successful!\n")
-    #auto_action("Attend Appointment Continue", "xpath", ATTEND_APPOINTMENT_XPATH, "click", "", STEP_TIME)
-    #auto_action("Reschedule Appointment Menu", "xpath", RESCHEDULE_APPOINTMENT_LABEL_XPATH, "click", "", STEP_TIME)
-    #auto_action("Reschedule Appointment Button", "xpath", RESCHEDULE_APPOINTMENT_XPATH, "click", "", STEP_TIME)
-    #auto_action("Reschedule Appointment Commit", "name", "commit", "click", "", STEP_TIME)
-
-def reschedule(date):
-    time = get_time(date)
-    #driver.get(APPOINTMENT_URL)
     auto_action("Attend Appointment Continue", "xpath", ATTEND_APPOINTMENT_XPATH, "click", "", STEP_TIME)
     auto_action("Reschedule Appointment Menu", "xpath", RESCHEDULE_APPOINTMENT_LABEL_XPATH, "click", "", STEP_TIME)
     auto_action("Reschedule Appointment Button", "xpath", RESCHEDULE_APPOINTMENT_XPATH, "click", "", STEP_TIME)
     auto_action("Reschedule Appointment Commit", "name", "commit", "click", "", STEP_TIME)
+
+def reschedule(date):
+    time = get_time(date)
+    # driver.get(APPOINTMENT_URL)
     headers = {
         "User-Agent": driver.execute_script("return navigator.userAgent;"),
         "Referer": driver.execute_script("return document.URL;"), 
@@ -194,7 +190,7 @@ def reschedule(date):
         #"appointments[asc_appointment][date]": '',
         #"appointments[asc_appointment][time]": '',
     }
-    r = 1 #requests.post(APPOINTMENT_URL, headers=headers, data=data, allow_redirects=True)
+    r = requests.post(APPOINTMENT_URL, headers=headers, data=data, allow_redirects=True)
     winsound.Beep(frequency, duration)
     if(r.text.find('Successfully Scheduled') != -1):
         title = "SUCCESS"
@@ -255,12 +251,6 @@ def info_logger(file_path, log):
     with open(file_path, "a") as file:
         file.write(str(datetime.now().time()) + ":\n" + log + "\n")
 
-# while 1:
-#     current_time = datetime.now()
-#     if current_time.hour==5 and current_time.minute==55:
-#         break
-#     time.sleep(10)
-
 if LOCAL_USE:
     #driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     chrome_install = ChromeDriverManager().install()
@@ -275,9 +265,6 @@ else:
 if __name__ == "__main__":
     first_loop = True    
     while 1:
-        # current_time = datetime.now()
-        # if current_time.hour==9:
-        #     break
         LOG_FILE_NAME = "log_" + str(datetime.now().date()) + ".txt"
         if first_loop:
             t0 = time.time()
@@ -287,12 +274,12 @@ if __name__ == "__main__":
             first_loop = False
         Req_count += 1
         try:
-            # now = datetime.now()
-            # if(now.minute%5) != 0:
-            #     myRnd = random.randint(1, 10)
-            #     #print(f"\n{now} - sleep for: {myRnd} secs\n")
-            #     time.sleep(myRnd)
-            #     continue
+            now = datetime.now()
+            if(now.minute%5) != 0:
+                myRnd = random.randint(1, 10)
+                #print(f"\n{now} - sleep for: {myRnd} secs\n")
+                time.sleep(myRnd)
+                continue
             msg = "-" * 60 + f"\nRequest count: {Req_count}, Log time: {datetime.today()}\n"
             print(msg)
             
@@ -315,7 +302,6 @@ if __name__ == "__main__":
                 msg = "****************Available dates:********************\n"+ msg
                 print(msg)
                 info_logger(LOG_FILE_NAME, msg)
-                reschedule(dates[0].get('date'))
                 date = get_available_date(dates)
                 if date:
                     # A good date to schedule for
