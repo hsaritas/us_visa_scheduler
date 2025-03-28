@@ -155,13 +155,17 @@ def auto_action(label, find_by, el_type, action, value, sleep_time=0):
 def start_process():
     # Bypass reCAPTCHA
     driver.get(SIGN_IN_LINK)
-    time.sleep(STEP_TIME)
+    time.sleep(STEP_TIME * 5)
     Wait(driver, 60).until(EC.presence_of_element_located((By.NAME, "commit")))
     auto_action("Click bounce", "xpath", '//a[@class="down-arrow bounce"]', "click", "", STEP_TIME)
     auto_action("Email", "id", "user_email", "send", USERNAME, STEP_TIME)
     auto_action("Password", "id", "user_password", "send", PASSWORD, STEP_TIME)
     auto_action("Privacy", "class", "icheckbox", "click", "", STEP_TIME)
     auto_action("Enter Panel", "name", "commit", "click", "", STEP_TIME)
+    try:
+        auto_action("Button", "class", "ui-button ui-corner-all ui-widget", "click", "", STEP_TIME)
+    except Exception as e:
+        print("No Button")
     Wait(driver, 60).until(EC.presence_of_element_located((By.XPATH, "//a[contains(text(), '" + REGEX_CONTINUE + "')]")))
     print("\n\tlogin successful!\n")
     auto_action("Attend Appointment Continue", "xpath", ATTEND_APPOINTMENT_XPATH, "click", "", STEP_TIME)
@@ -268,8 +272,12 @@ if __name__ == "__main__":
             t0 = time.time()
             total_time = 0
             Req_count = 0
-            start_process()
-            first_loop = False        
+            try:
+                start_process()
+                first_loop = False        
+            except Exception as e:
+                print("start_process failed" + traceback.format_exc())
+                time.sleep(5)
         try:
             now = datetime.now()
             if(now.minute%5) != 0:
