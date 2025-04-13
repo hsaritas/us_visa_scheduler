@@ -175,6 +175,11 @@ def start_process():
 
 def reschedule(date):
     time = get_time(date)
+    if(time==""):
+        print("No time available!")
+        title="NO TIME"
+        msg="NO TIME"
+        return [title, msg]
     # driver.get(APPOINTMENT_URL)
     headers = {
         "User-Agent": driver.execute_script("return navigator.userAgent;"),
@@ -270,12 +275,12 @@ else:
 
 if __name__ == "__main__":
     first_loop = True    
+    Req_count = 0
     while 1:
         LOG_FILE_NAME = "log_" + str(datetime.now().date()) + ".txt"
         if first_loop:
             t0 = time.time()
             total_time = 0
-            Req_count = 0
             try:
                 start_process()
                 first_loop = False        
@@ -290,7 +295,7 @@ if __name__ == "__main__":
                 time.sleep(myRnd)
                 continue
             Req_count += 1
-            msg = "-" * 60 + f"\nRequest count: {Req_count}, Log time: {datetime.today()}\n"
+            msg = "-" * 60 + f"\nRequest count: {Req_count}, Log time: {datetime.today().time()}\n"
             print(msg)
             
             info_logger(LOG_FILE_NAME, msg)
@@ -315,7 +320,8 @@ if __name__ == "__main__":
                 if date:
                     # A good date to schedule for
                     END_MSG_TITLE, msg = reschedule(date)
-                    break
+                    if(msg!="NO TIME"):
+                        break
                 RETRY_WAIT_TIME = random.randint(RETRY_TIME_L_BOUND, RETRY_TIME_U_BOUND)
                 t1 = time.time()
                 total_time = t1 - t0
