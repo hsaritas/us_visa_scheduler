@@ -178,9 +178,11 @@ def reschedule(date):
     # driver.get(APPOINTMENT_URL)
     headers = {
         "User-Agent": driver.execute_script("return navigator.userAgent;"),
+        "Origin": "https://ais.usvisa-info.com",
+        "upgrade-insecure-requests": 1,
         "Referer": driver.execute_script("return document.URL;"), 
         "Content-Type": "application/x-www-form-urlencoded",
-        "Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
+        #"Cookie": "_yatri_session=" + driver.get_cookie("_yatri_session")["value"]
     }
     data = {
         #utf8": '✓',
@@ -221,11 +223,13 @@ def get_time(date):
     data = json.loads(content)
     print(content)
     info_logger(LOG_FILE_NAME, content)
-    time = data.get("available_times")[0]
-    print(f"Got time successfully! {date} {time}")
-    return time
-
-
+    try:
+        time = data.get("available_times")[0]
+        print(f"Got time successfully! {date} {time}")
+        return time   
+    except Exception as e:
+        print(f"cannot get time")
+        return ""
 def is_logged_in():
     content = driver.page_source
     if(content.find("error") != -1):
